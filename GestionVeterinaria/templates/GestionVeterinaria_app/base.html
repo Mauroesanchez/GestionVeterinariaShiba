@@ -1,0 +1,141 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Veterinaria SHIBA{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --sidebar:#2c3e50;
+      --topbar:#1b3a57;
+      --bg:#f5f6fa;
+      --card:#fff;
+      --text:#1b2b3a;
+      --muted:#94a3b8;
+      --border:#e6e9ef;
+      --radius:14px;
+      --shadow:0 8px 24px rgba(0,0,0,.06);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; display:flex; min-height:100vh;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;
+      color:var(--text); background:var(--bg);
+    }
+
+    /* Sidebar */
+    .sidebar{
+      width:240px; background:var(--sidebar); color:#fff;
+      display:flex; flex-direction:column; padding:18px 14px; gap:6px;
+      position:sticky; top:0; height:100vh;
+    }
+    .brand{font-weight:800; letter-spacing:.3px; margin:4px 8px 10px}
+    .nav a{
+      color:#fff; text-decoration:none; padding:10px 12px; border-radius:8px;
+      display:block; transition:background .15s ease;
+    }
+    .nav a:hover{background:rgba(255,255,255,.12)}
+    .nav a.active{background:#fff; color:var(--sidebar); font-weight:700}
+
+    /* Main column */
+    .main{flex:1; display:flex; flex-direction:column; min-width:0}
+
+    /* Topbar */
+    .topbar{
+      background:var(--topbar); color:#fff; padding:10px 18px;
+      display:flex; align-items:center; gap:18px; justify-content:flex-end;
+    }
+    .topbar a{color:#fff; text-decoration:none; font-weight:600}
+    .topbar a:hover{text-decoration:underline}
+
+    /* Content */
+    .page{padding:18px}
+    .card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow)}
+    .card .content{padding:18px}
+
+    /* Messages */
+    .messages{margin:12px 0; display:grid; gap:8px}
+    .msg{padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:#fff}
+    .msg.success{background:#f0fff3}
+    .msg.error{background:#fff0f0}
+    .msg.warning{background:#fff9e6}
+    .msg.info{background:#eef6ff}
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">🐾 SHIBA</div>
+    <nav class="nav">
+      {% with name=request.resolver_match.url_name %}
+        {% if user.is_authenticated %}
+          {# Render según grupo recorriendo los grupos del usuario #}
+          {% for g in user.groups.all %}
+            {% if g.name == 'administrativo' %}
+              <a href="{% url 'citas_list' %}" class="{% if name == 'citas_list' %}active{% endif %}">Citas</a>
+              <a href="{% url 'nueva_cita' %}" class="{% if name == 'nueva_cita' %}active{% endif %}">Programar Cita</a>
+
+              <a href="{% url 'nuevo_paciente' %}" class="{% if name == 'nuevo_paciente' %}active{% endif %}">Registrar Paciente</a>
+              <a href="{% url 'buscar_paciente' %}" class="{% if name == 'buscar_paciente' %}active{% endif %}">Buscar Paciente</a>
+
+              <a href="{% url 'nuevo_propietario' %}" class="{% if name == 'nuevo_propietario' %}active{% endif %}">Registrar Propietario</a>
+              <a href="{% url 'buscar_propietario' %}" class="{% if name == 'buscar_propietario' %}active{% endif %}">Buscar Propietario</a>
+
+              <a href="{% url 'historialmedico' %}" class="{% if name == 'historialmedico' %}active{% endif %}">Historial Médico</a>
+              <a href="{% url 'estadisticas' %}" class="{% if name == 'estadisticas' %}active{% endif %}">Estadísticas</a>
+            {% elif g.name == 'veterinario' %}
+              <a href="{% url 'mis_citas' %}" class="{% if name == 'mis_citas' %}active{% endif %}">Mis Citas</a>
+              <a href="{% url 'buscar_paciente' %}" class="{% if name == 'buscar_paciente' %}active{% endif %}">Buscar Paciente</a>
+              <a href="{% url 'historialmedico' %}" class="{% if name == 'historialmedico' %}active{% endif %}">Historial Médico</a>
+            {% endif %}
+          {% empty %}
+            {# Usuario sin grupo: sin menú lateral #}
+          {% endfor %}
+
+          {% if user.is_authenticated and name != 'login' %}
+            <a href="{% url 'logout' %}">Cerrar sesión</a>
+          {% endif %}
+        {% else %}
+          <a href="{% url 'login' %}" class="{% if name == 'login' %}active{% endif %}">Ingresar</a>
+        {% endif %}
+      {% endwith %}
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <a href="{% url 'home' %}" class="{% if name == 'home' %}active{% endif %}">Inicio</a>
+      <a href="{% url 'nosotros' %}">Nosotros</a>
+      <a href="{% url 'contacto' %}">Contacto</a>
+      {% if user.is_authenticated %}
+        <span>Bienvenido {{ user.username }}</span>
+      {% else %}
+        <a href="{% url 'login' %}">Ingresar</a>
+      {% endif %}
+    </div>
+
+    <main class="page">
+      {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+            <div class="msg {{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="card">
+        <div class="content">
+          {% block content %}{% endblock %}
+        </div>
+      </div>
+    </main>
+  </div>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

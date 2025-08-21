@@ -1,0 +1,104 @@
+{% extends "GestionVeterinaria_app/base.html" %}
+
+{% block title %}Agenda de Citas · Veterinaria SHIBA{% endblock %}
+
+{% block extra_head %}
+<style>
+  .toolbar{display:flex;align-items:center;gap:12px;margin:8px 0 14px}
+  .bell{font-size:20px}
+  .badge{display:inline-block;padding:2px 10px;border-radius:999px;background:#eee;font-size:12px}
+  .badge.warn{background:#ffe08a}
+  .badge.ok{background:#b8f2c8}
+
+  table{border-collapse:collapse;width:100%}
+  th,td{border:1px solid #ddd;padding:8px;text-align:left}
+  thead th{background:#f5f5f5}
+  tr.hoy{background:#fff8e1}        /* Hoy */
+  tr.maniana{background:#e9f7ef}    /* Mañana */
+
+  .btn{padding:6px 10px;border:1px solid #2c3e50;border-radius:6px;text-decoration:none;margin-right:6px;display:inline-block}
+  .btn:hover{background:#f2f6ff}
+  .btn.secondary{border-color:#6b7280}
+  .btn.danger{border-color:#b91c1c}
+  .muted{color:#777}
+
+  .estado{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;border:1px solid #ddd}
+  .estado.prog{background:#eef6ff;border-color:#cfe3ff}
+  .estado.atendida{background:#e8fff1;border-color:#bdf0d0}
+  .estado.cancelada{background:#ffecec;border-color:#ffc9c9}
+</style>
+{% endblock %}
+
+{% block content %}
+  <h1>Agenda de Citas (Administrativo)</h1>
+
+  <div class="toolbar">
+    <span class="bell">🔔</span>
+    <span class="badge warn">Hoy: {{ count_hoy }}</span>
+    <span class="badge ok">Mañana: {{ count_maniana }}</span>
+    <span class="badge">Total de Alertas: {{ count_total }}</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Fecha y Hora</th>
+        <th>Paciente</th>
+        <th>Propietario</th>
+        <th>Veterinario</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for cita in citas %}
+        {% if cita.id in hoy_ids %}
+          <tr class="hoy">
+        {% elif cita.id in maniana_ids %}
+          <tr class="maniana">
+        {% else %}
+          <tr>
+        {% endif %}
+          <td>{{ cita.fecha_hora|date:"d/m/Y H:i" }}</td>
+          <td>{{ cita.paciente.nombre }}</td>
+          <td>{{ cita.paciente.propietario.nombre }} {{ cita.paciente.propietario.apellido }}</td>
+          <td>{{ cita.veterinario.nombre }} {{ cita.veterinario.apellido }}</td>
+          <td>
+            {% with estado=cita.estado|default:"programada" %}
+              <span class="estado {% if estado == "programada" %}prog{% elif estado == "atendida" %}atendida{% elif estado == "cancelada" %}cancelada{% endif %}">
+                {% if cita.estado %}{{ cita.estado|title }}{% else %}{% if cita.atencion %}Atendida{% else %}Programada{% endif %}{% endif %}
+              </span>
+            {% endwith %}
+          </td>
+          <td>
+        {% with raw=cita.estado|default_if_none:"" %}
+          {% with estado=raw|lower %}
+            {# Atender: si no está atendida ni cancelada #}
+            {% if not cita.atencion and estado != "cancelada" %}
+              <a class="btn" href="{% url 'atender_cita' cita.id %}">Atender</a>
+            {% else %}
+              <span class="muted"> </span>
+            {% endif %}
+
+            {# Editar: siempre disponible #}
+            <a class="btn secondary" href="{% url 'editar_cita' cita.id %}">Editar</a>
+
+            {# Cancelar: si no está atendida ni cancelada #}
+            {% if not cita.atencion and estado != "cancelada" %}
+              <a class="btn danger"
+                href="{% url 'cancelar_cita' cita.id %}"
+                onclick="return confirm('¿Cancelar esta cita? El horario quedará libre.');">
+                Cancelar
+              </a>
+            {% endif %}
+          {% endwith %}
+        {% endwith %}
+      </td>
+
+        </tr>
+      {% empty %}
+        <tr><td colspan="6">No hay citas registradas.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

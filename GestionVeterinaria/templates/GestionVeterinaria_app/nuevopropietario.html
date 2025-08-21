@@ -1,0 +1,25 @@
+{% extends "GestionVeterinaria_app/base.html" %}
+
+{% block title %}Registrar Propietario · Veterinaria SHIBA{% endblock %}
+
+{% block extra_head %}
+<style>
+  form .row{margin-bottom:10px}
+  label{display:block;margin-bottom:4px;font-weight:600}
+  input, select, textarea{width:100%;padding:10px;border:1px solid #c7d0db;border-radius:8px}
+  button{padding:10px 12px;border:none;border-radius:8px;background:#003764;color:#fff;font-weight:700;cursor:pointer}
+  button:hover{background:#0b4e86}
+</style>
+{% endblock %}
+
+{% block content %}
+  <h1>Nuevo Propietario</h1>
+
+  <form action="{% url 'nuevo_propietario' %}" method="post">
+    {% csrf_token %}
+    <div class="row">
+      {{ form.as_p }}
+    </div>
+    <button type="submit">Guardar</button>
+  </form>
+{% endblock %}

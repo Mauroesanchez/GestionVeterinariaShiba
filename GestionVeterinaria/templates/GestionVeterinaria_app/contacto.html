@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contacto - Veterinaria SHIBA</title>
+  {% load static %}
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      background: #003764;
+      color: #fff;
+      width: 100%;
+      padding: 10px 20px;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    header img {
+      height: 50px;
+      border-radius: 50%;
+    }
+    header nav {
+      display: flex;
+      gap: 20px;
+    }
+    header nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+    }
+    .content {
+      max-width: 800px;
+      width: 100%;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,.2);
+      color: #333;
+    }
+    .content h1 {
+      text-align: center;
+      color: #003764;
+      margin-bottom: 20px;
+    }
+    .info {
+      margin: 20px 0;
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+    .info p {
+      margin: 10px 0;
+    }
+    .map {
+      margin-top: 20px;
+      text-align: center;
+    }
+    footer {
+      padding: 10px;
+      background: #003764;
+      color: #fff;
+      width: 100%;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="{% static 'GestionVeterinaria_app/img/logoshiba.png' %}" alt="Logotipo"/>
+      <span>Veterinaria SHIBA</span>
+    </div>
+    <nav>
+      <a href="{% url 'home' %}">Inicio</a>
+      <a href="{% url 'nosotros' %}">Nosotros</a>
+      <a href="{% url 'login' %}">Iniciar Sesión</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="content">
+      <h1>Contacto</h1>
+      <div class="info">
+        <p><strong>Dirección:</strong> Av. Siempre Viva 123, Ciudad Ushuaia</p>
+        <p><strong>Teléfono:</strong> +54 387 555-1234</p>
+        <p><strong>Email:</strong> contacto@veterinariashiba.com</p>
+        <p><strong>Horario de atención:</strong> Lunes a Viernes de 9:00 a 18:00 hs</p>
+      </div>
+      <div class="map">
+        <iframe 
+          src="https://maps.google.com/maps?q=Ushuaia&t=&z=13&ie=UTF8&iwloc=&output=embed"
+          width="100%" height="300" style="border:0; border-radius:10px;" allowfullscreen>
+        </iframe>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Veterinaria Shiba - Todos los derechos reservados.</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,89 @@
+{% extends "GestionVeterinaria_app/base.html" %}
+
+{% block title %}Historial Médico · Veterinaria SHIBA{% endblock %}
+
+{% block extra_head %}
+<style>
+  .form-container{
+    background-color:#ffffff;
+    border:1px solid #e6e9ef;
+    border-radius:12px;
+    box-shadow:0 6px 18px rgba(0,0,0,.05);
+    max-width:700px;
+    margin:0 auto 20px;
+    padding:18px;
+  }
+  .form-container h2{
+    margin:0 0 12px; color:#003764;
+  }
+  .form-container label{
+    display:block; margin:10px 0 6px; font-weight:600; color:#003764;
+  }
+  .form-container select, .form-container button{
+    width:100%; padding:10px; border:1px solid #c7d0db; border-radius:8px; outline:none;
+  }
+  .form-container button{
+    background:#003764; color:#fff; font-weight:700; cursor:pointer; margin-top:10px;
+  }
+  .form-container button:hover{ background:#0b4e86; }
+
+  .historial-container{
+    background:#ffffff;
+    border:1px solid #e6e9ef;
+    border-radius:12px;
+    box-shadow:0 6px 18px rgba(0,0,0,.05);
+    padding:18px; max-width:900px; margin:20px auto 0;
+  }
+  .historial-container h3{ margin-top:0; color:#003764; }
+
+  .historial-container ul{ list-style:none; padding:0; margin:0; display:grid; gap:12px; }
+  .historial-container li{
+    border:1px solid #e6e9ef; border-radius:10px; padding:12px; background:#fafafa;
+  }
+  .historial-container li h4{ margin:0 0 6px; color:#003764; }
+  .empty{color:#666}
+</style>
+{% endblock %}
+
+{% block content %}
+  <h1>Historial Médico</h1>
+
+  <div class="form-container">
+    <h2>Ver historial por paciente</h2>
+    <form method="get" action="{% url 'historialmedico' %}">
+      <label for="paciente">Seleccione un paciente:</label>
+      <select name="paciente" id="paciente">
+        <option value="">-- Seleccionar --</option>
+        {% for p in pacientes %}
+          <option value="{{ p.id }}" {% if paciente and p.id == paciente.id %}selected{% endif %}>
+            {{ p.nombre }} {{ p.apellido }}
+          </option>
+        {% endfor %}
+      </select>
+      <button type="submit">Ver Historial</button>
+    </form>
+  </div>
+
+  {% if paciente %}
+    <div class="historial-container">
+      <h3>Historial de {{ paciente.nombre }} {{ paciente.apellido }}</h3>
+
+      {% if historial_medico %}
+        <ul>
+          {% for consulta in historial_medico %}
+            <li>
+              <h4>Fecha: {{ consulta.fecha_consulta|date:"d/m/Y H:i" }}</h4>
+              <p><strong>Diagnóstico:</strong> {{ consulta.diagnostico }}</p>
+              <p><strong>Tratamiento:</strong> {{ consulta.tratamiento }}</p>
+              {% if consulta.nota_veterinaria %}
+                <p><strong>Nota Veterinaria:</strong> {{ consulta.nota_veterinaria }}</p>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty">No hay historial médico para este paciente.</p>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endblock %}

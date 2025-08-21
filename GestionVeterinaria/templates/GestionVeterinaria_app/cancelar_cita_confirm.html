@@ -1,0 +1,39 @@
+{% extends "GestionVeterinaria_app/base.html" %}
+
+{% block title %}Cancelar Cita · Veterinaria SHIBA{% endblock %}
+
+{% block extra_head %}
+<style>
+  .cancel-wrap{max-width:760px;margin:auto;text-align:center}
+  .cancel-box{
+    background:#fff;border:1px solid #e6e9ef;border-radius:12px;padding:20px;
+    box-shadow:0 8px 24px rgba(0,0,0,.06);margin-bottom:16px;color:#334155
+  }
+  .cancel-box strong{color:#0f172a}
+  .actions{display:flex;gap:12px;justify-content:center;margin-top:18px}
+  .btn{padding:8px 14px;border:1px solid #2c3e50;border-radius:8px;text-decoration:none}
+  .btn.primary{background:#b91c1c;color:#fff;border-color:#b91c1c}
+  .btn.primary:hover{filter:brightness(1.05)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cancel-wrap">
+  <h1>Cancelar Cita</h1>
+
+  <div class="cancel-box">
+    ¿Confirmás cancelar la cita del  
+    <strong>{{ cita.fecha_hora|date:"d/m/Y H:i" }}</strong><br>
+    para <strong>{{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</strong><br>
+    con <strong>{{ cita.veterinario.nombre }} {{ cita.veterinario.apellido }}</strong>?
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="actions">
+      <button class="btn primary" type="submit">Sí, cancelar</button>
+      <a class="btn" href="{% if user.groups.all.0.name == 'administrativo' %}{% url 'citas_list' %}{% else %}{% url 'mis_citas' %}{% endif %}">Volver</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

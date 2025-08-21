@@ -1,0 +1,78 @@
+{% extends "GestionVeterinaria_app/base.html" %}
+
+{% block title %}Atender Cita · Veterinaria SHIBA{% endblock %}
+
+{% block extra_head %}
+<style>
+  .header-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .pill{
+    display:inline-block;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:600;
+    border:1px solid var(--border); background:#fff; color:#334155;
+  }
+  .pill.programada{background:#eef6ff;border-color:#bfdbfe;color:#1e40af}
+  .pill.atendida{background:#ecfdf5;border-color:#bbf7d0;color:#065f46}
+  .pill.cancelada{background:#fef2f2;border-color:#fecaca;color:#991b1b}
+
+  .info-box{background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+  .form-grid{display:grid;gap:16px;margin-top:16px}
+  .form-field label{display:block;font-weight:600;margin-bottom:6px}
+  .form-field textarea{width:100%;min-height:120px;padding:10px;border:1px solid var(--border);border-radius:10px;resize:vertical}
+  .helptext,.errorlist{color:#991b1b;font-size:13px;margin-top:6px}
+  .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+  .btn.primary{background:#0f3554;color:#fff;border-color:#0f3554}
+  .btn.primary:hover{filter:brightness(.95)}
+</style>
+{% endblock %}
+
+{% block content %}
+
+  <div class="header-row">
+    <h1>Atender Cita</h1>
+    <span class="pill {{ cita.estado|default:'programada' }}">
+      {{ cita.get_estado_display|default:"Programada" }}
+    </span>
+  </div>
+
+  <div class="info-box" style="margin-top:12px">
+    <p><strong>Fecha/Hora:</strong> {{ cita.fecha_hora|date:"d/m/Y H:i" }}</p>
+    <p>
+      <strong>Paciente:</strong>
+      {{ cita.paciente.nombre }}{% if cita.paciente.apellido %} {{ cita.paciente.apellido }}{% endif %}
+      {% if cita.paciente.especie %}
+        ({{ cita.paciente.especie }}{% if cita.paciente.raza %} / {{ cita.paciente.raza }}{% endif %})
+      {% endif %}
+    </p>
+    <p>
+      <strong>Veterinario:</strong> {{ cita.veterinario.nombre }} {{ cita.veterinario.apellido }}
+    </p>
+  </div>
+
+  <form method="post" class="form-grid">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <div class="form-field">
+      <label for="{{ form.diagnostico.id_for_label }}">Diagnóstico</label>
+      {{ form.diagnostico }}
+      {{ form.diagnostico.errors }}
+    </div>
+
+    <div class="form-field">
+      <label for="{{ form.tratamiento.id_for_label }}">Tratamiento</label>
+      {{ form.tratamiento }}
+      {{ form.tratamiento.errors }}
+    </div>
+
+    <div class="form-field">
+      <label for="{{ form.nota_veterinaria.id_for_label }}">Nota</label>
+      {{ form.nota_veterinaria }}
+      {{ form.nota_veterinaria.errors }}
+    </div>
+
+    <div class="actions">
+      <a class="btn" href="{% if user.groups.all.0.name == 'veterinario' %}{% url 'mis_citas' %}{% else %}{% url 'citas_list' %}{% endif %}">Cancelar</a>
+      <button type="submit" class="btn primary">Guardar atención</button>
+    </div>
+  </form>
+
+{% endblock %}

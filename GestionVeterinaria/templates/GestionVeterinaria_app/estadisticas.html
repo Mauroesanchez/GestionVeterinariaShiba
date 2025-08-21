@@ -1,0 +1,107 @@
+{% extends "GestionVeterinaria_app/base.html" %}
+
+{% block title %}Estadísticas (últimos 60 días) · Veterinaria SHIBA{% endblock %}
+
+{% block extra_head %}
+<style>
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+  .card{border:1px solid #ddd;border-radius:10px;padding:12px;background:#fafafa}
+  .card h3{margin:0 0 6px;font-size:14px;color:#666}
+  .card .num{font-size:28px;font-weight:700}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  table{width:100%;border-collapse:collapse}
+  th,td{border:1px solid #ddd;padding:8px;text-align:left}
+  thead th{background:#f5f5f5}
+  .small{color:#666;font-size:12px;margin-bottom:10px}
+</style>
+{% endblock %}
+
+{% block content %}
+  <h1>Estadísticas (últimos 60 días)</h1>
+  <div class="small">Desde: {{ desde|date:"d/m/Y H:i" }} — Hasta: {{ hasta|date:"d/m/Y H:i" }}</div>
+
+  <section class="cards">
+    <div class="card">
+      <h3>Pacientes nuevos</h3>
+      <div class="num">{{ pacientes_nuevos_60d }}</div>
+    </div>
+    <div class="card">
+      <h3>Citas totales</h3>
+      <div class="num">{{ total_citas_60d }}</div>
+    </div>
+    <div class="card">
+      <h3>Veterinarios con atención</h3>
+      <div class="num">{{ citas_por_vet|length }}</div>
+    </div>
+    <div class="card">
+      <h3>Especies atendidas</h3>
+      <div class="num">{{ especies|length }}</div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div>
+      <h2>Citas por veterinario</h2>
+      <table>
+        <thead>
+          <tr><th>Veterinario</th><th>Citas</th></tr>
+        </thead>
+        <tbody>
+          {% for r in citas_por_vet %}
+            <tr><td>{{ r.veterinario }}</td><td>{{ r.total }}</td></tr>
+          {% empty %}
+            <tr><td colspan="2">Sin datos.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <h2>Especies más atendidas</h2>
+      <table>
+        <thead>
+          <tr><th>Especie</th><th>Pacientes únicos</th></tr>
+        </thead>
+        <tbody>
+          {% for e in especies %}
+            <tr><td>{{ e.paciente__especie }}</td><td>{{ e.pacientes_unicos }}</td></tr>
+          {% empty %}
+            <tr><td colspan="2">Sin datos.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <h2>Top propietarios (por pacientes atendidos)</h2>
+      <table>
+        <thead>
+          <tr><th>Propietario</th><th>Pacientes atendidos</th></tr>
+        </thead>
+        <tbody>
+          {% for p in top_propietarios %}
+            <tr><td>{{ p.propietario }}</td><td>{{ p.pacientes_atendidos }}</td></tr>
+          {% empty %}
+            <tr><td colspan="2">Sin datos.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div>
+      <h2>Horarios pico (citas por hora)</h2>
+      <table>
+        <thead>
+          <tr><th>Hora</th><th>Citas</th></tr>
+        </thead>
+        <tbody>
+          {% for h in horarios %}
+            <tr><td>{{ h.hora }}:00</td><td>{{ h.total }}</td></tr>
+          {% empty %}
+            <tr><td colspan="2">Sin datos.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

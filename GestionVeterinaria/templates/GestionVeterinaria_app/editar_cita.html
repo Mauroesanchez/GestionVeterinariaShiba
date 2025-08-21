@@ -1,0 +1,82 @@
+{% extends "GestionVeterinaria_app/base.html" %}
+
+{% block title %}Editar Cita · Veterinaria SHIBA{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Tarjeta y layout */
+  .form-wrap{max-width:760px;margin:auto}
+  .head{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:16px;margin-bottom:14px
+  }
+  .who{color:#475569}
+  .who strong{color:#0f172a}
+
+  /* Chip de estado */
+  .st{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;border:1px solid transparent}
+  .st-prog{background:#eaf2ff;border-color:#cfe0ff;color:#0b4a8f}
+  .st-ok{background:#e8f7ee;border-color:#bde5c8;color:#176b3a}
+  .st-cancel{background:#ffe9e9;border-color:#ffcaca;color:#a42020}
+
+  /* Formulario renderizado con as_p */
+  form.edit-cita p{margin:0 0 12px}
+  form.edit-cita label{display:block;margin-bottom:6px;font-weight:600;color:#0f172a}
+  form.edit-cita input[type="text"],
+  form.edit-cita input[type="date"],
+  form.edit-cita input[type="time"],
+  form.edit-cita select,
+  form.edit-cita textarea{
+    width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:8px;outline:none;
+    background:#fff
+  }
+  form.edit-cita input:focus,
+  form.edit-cita select:focus,
+  form.edit-cita textarea:focus{box-shadow:0 0 0 3px rgba(30,64,175,.15);border-color:#94a3b8}
+
+  /* Mensajes de error / ayuda de Django */
+  .errorlist{margin:6px 0 0;padding-left:16px;color:#b91c1c}
+  .helptext{display:block;margin-top:6px;color:#64748b;font-size:12px}
+
+  /* Acciones */
+  .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+  .btn{padding:8px 14px;border:1px solid #2c3e50;border-radius:8px;text-decoration:none}
+  .btn.primary{background:#1b3a57;color:#fff;border-color:#1b3a57}
+  .btn.primary:hover{filter:brightness(1.05)}
+</style>
+{% endblock %}
+
+{% block content %}
+  <div class="form-wrap">
+    <div class="head">
+      <h1>Editar Cita</h1>
+
+      {# Chip de estado actual #}
+      {% with s=cita.estado|default_if_none:'programada'|lower %}
+        {% if s == 'atendida' %}
+          <span class="st st-ok">Atendida</span>
+        {% elif s == 'cancelada' %}
+          <span class="st st-cancel">Cancelada</span>
+        {% else %}
+          <span class="st st-prog">Programada</span>
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    <div class="who">
+      <div><strong>Paciente:</strong> {{ cita.paciente.nombre }} {{ cita.paciente.apellido }}</div>
+      <div><strong>Veterinario:</strong> {{ cita.veterinario.nombre }} {{ cita.veterinario.apellido }}</div>
+      <div><strong>Fecha actual:</strong> {{ cita.fecha_hora|date:"d/m/Y H:i" }}</div>
+    </div>
+
+    <form method="post" class="edit-cita">
+      {% csrf_token %}
+      {{ form.as_p }}
+
+      <div class="actions">
+        <button type="submit" class="btn primary">Guardar cambios</button>
+        <a href="{% if user.groups.all.0.name == 'administrativo' %}{% url 'citas_list' %}{% else %}{% url 'mis_citas' %}{% endif %}" class="btn">Volver</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

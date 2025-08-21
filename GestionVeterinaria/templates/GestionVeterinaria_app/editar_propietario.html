@@ -1,0 +1,30 @@
+{% extends "GestionVeterinaria_app/base.html" %}
+
+{% block title %}Editar Propietario · Veterinaria SHIBA{% endblock %}
+
+{% block extra_head %}
+<style>
+  form .row{margin-bottom:10px}
+  label{display:block;margin-bottom:4px}
+  input, textarea{width:100%;padding:8px;box-sizing:border-box}
+  button, .btn{padding:8px 12px}
+  .actions{display:flex;gap:8px;margin-top:12px}
+</style>
+{% endblock %}
+
+{% block content %}
+  <h1>Editar Propietario</h1>
+
+  <p><strong>Propietario:</strong> {{ propietario.nombre }} {{ propietario.apellido }}</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="row">
+      {{ form.as_p }}
+    </div>
+    <div class="actions">
+      <button type="submit">Guardar cambios</button>
+      <a class="btn" href="{% url 'buscar_propietario' %}">Volver a buscar</a>
+    </div>
+  </form>
+{% endblock %}

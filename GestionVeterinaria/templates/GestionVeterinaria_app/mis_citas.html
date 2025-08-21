@@ -1,0 +1,100 @@
+{% extends "GestionVeterinaria_app/base.html" %}
+
+{% block title %}Mis Citas · Veterinaria SHIBA{% endblock %}
+
+{% block extra_head %}
+<style>
+  .toolbar{display:flex;align-items:center;gap:12px;margin:8px 0 14px}
+  .bell{font-size:20px}
+  .badge{display:inline-block;padding:2px 10px;border-radius:999px;background:#eee;font-size:12px}
+  .badge.warn{background:#ffe08a}
+  .badge.ok{background:#b8f2c8}
+
+  table{border-collapse:collapse;width:100%}
+  th,td{border:1px solid #e5e7eb;padding:10px;text-align:left}
+  thead th{background:#f8fafc}
+  tr.row-hoy{background:#fff8e1}       /* Hoy */
+  tr.row-maniana{background:#e9f7ef}   /* Mañana */
+
+  .btn{padding:6px 10px;border:1px solid #2c3e50;border-radius:6px;text-decoration:none}
+  .btn:hover{background:#f2f6ff}
+  .muted{color:#777}
+  .empty{padding:10px;border:1px dashed #cbd5e1;border-radius:8px;background:#f8fafc}
+
+  /* Chips de estado */
+  .st{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;border:1px solid transparent}
+  .st-prog{background:#eaf2ff;border-color:#cfe0ff;color:#0b4a8f}
+  .st-ok{background:#e8f7ee;border-color:#bde5c8;color:#176b3a}
+  .st-cancel{background:#ffe9e9;border-color:#ffcaca;color:#a42020}
+</style>
+{% endblock %}
+
+{% block content %}
+  <h1>Mis Citas</h1>
+
+  <div class="toolbar">
+    <span class="bell">🔔</span>
+    <span class="badge warn">Hoy: {{ count_hoy }}</span>
+    <span class="badge ok">Mañana: {{ count_maniana }}</span>
+    <span class="badge">Total de Alertas: {{ count_total }}</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Fecha y Hora</th>
+        <th>Paciente</th>
+        <th>Propietario</th>
+        <th>Estado</th>
+        <th>Acción</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for cita in citas %}
+        {% if cita.id in hoy_ids %}
+          <tr class="row-hoy">
+        {% elif cita.id in maniana_ids %}
+          <tr class="row-maniana">
+        {% else %}
+          <tr>
+        {% endif %}
+
+          <td>{{ cita.fecha_hora|date:"d/m/Y H:i" }}</td>
+          <td>{{ cita.paciente.nombre }}</td>
+          <td>{{ cita.paciente.propietario.nombre }} {{ cita.paciente.propietario.apellido }}</td>
+
+          {# Normalizamos el estado por si hubiera valores antiguos como 'pendiente' #}
+          {% with s=cita.estado|default_if_none:'programada' %}
+          {% with s=s|lower %}
+            <td>
+              {% if s == 'atendida' %}
+                <span class="st st-ok">Atendida</span>
+              {% elif s == 'cancelada' %}
+                <span class="st st-cancel">Cancelada</span>
+              {% elif s == 'programada' or s == 'pendiente' %}
+                <span class="st st-prog">Programada</span>
+              {% else %}
+                <span class="muted">{{ s }}</span>
+              {% endif %}
+            </td>
+
+            <td>
+              {% if s == 'programada' or s == 'pendiente' %}
+                <a class="btn" href="{% url 'atender_cita' cita.id %}">Atender</a>
+              {% else %}
+                <span class="muted"> </span>
+              {% endif %}
+            </td>
+          {% endwith %}
+          {% endwith %}
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="5">
+            <div class="empty">No tenés citas programadas.</div>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

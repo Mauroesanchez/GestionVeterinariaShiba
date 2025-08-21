@@ -1,0 +1,93 @@
+{% extends "GestionVeterinaria_app/base.html" %}
+{% load static %}
+
+{% block title %}Programar Cita · Veterinaria SHIBA{% endblock %}
+
+{% block extra_head %}
+<style>
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .form-grid .full{grid-column:1 / -1}
+  label{display:block;margin-bottom:6px;font-weight:600;color:#1b2b3a}
+  select,input{width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px}
+  .actions{margin-top:14px}
+  .btn{padding:8px 12px;border:1px solid #2c3e50;border-radius:8px;text-decoration:none}
+  .btn.primary{background:#1b3a57;color:#fff;border-color:#1b3a57}
+  .help{color:#64748b;font-size:12px}
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>Programar Cita</h1>
+
+<form method="post" action="{% url 'nueva_cita' %}" id="citaForm">
+  {% csrf_token %}
+
+  <div class="form-grid">
+    <div>
+      <label for="{{ form.veterinario.id_for_label }}">Veterinario</label>
+      {{ form.veterinario }}
+      <div class="help">Seleccione el profesional.</div>
+    </div>
+
+    <div>
+      <label for="{{ form.fecha.id_for_label }}">Fecha</label>
+      {{ form.fecha }}
+      <div class="help">Jornada laboral: 09:00 a 18:00</div>
+    </div>
+
+    <div class="full">
+      <label for="{{ form.hora_slot.id_for_label }}">Horario disponible</label>
+      {{ form.hora_slot }}
+      <div class="help">Se cargarán automáticamente según el veterinario y la fecha.</div>
+    </div>
+
+    <div>
+      <label for="{{ form.paciente.id_for_label }}">Paciente</label>
+      {{ form.paciente }}
+    </div>
+
+    <div>
+      <label for="{{ form.administrativo.id_for_label }}">Administrativo</label>
+      {{ form.administrativo }}
+    </div>
+  </div>
+
+  {{ form.fecha_hora }} {# hidden: lo setea el form en clean() #}
+
+  <div class="actions">
+    <button class="btn primary" type="submit">Guardar</button>
+  </div>
+</form>
+
+<script>
+  (function(){
+    const vetSelect = document.getElementById("{{ form.veterinario.id_for_label }}") || document.querySelector('[name="veterinario"]');
+    const fechaInput = document.getElementById("{{ form.fecha.id_for_label }}") || document.querySelector('[name="fecha"]');
+    const slotSelect = document.getElementById("{{ form.hora_slot.id_for_label }}") || document.querySelector('[name="hora_slot"]');
+
+    async function cargarSlots(){
+      const vetId = vetSelect.value;
+      const fecha = fechaInput.value;
+      if(!vetId || !fecha){
+        slotSelect.innerHTML = '<option value="">Seleccione un horario</option>';
+        return;
+      }
+      try{
+        const resp = await fetch(`{% url 'api_slots' %}?vet_id=${vetId}&fecha=${fecha}`);
+        const data = await resp.json();
+        const opts = ['<option value="">Seleccione un horario</option>']
+          .concat((data.slots || []).map(h => `<option value="${h}">${h}</option>`));
+        slotSelect.innerHTML = opts.join('');
+      }catch(e){
+        slotSelect.innerHTML = '<option value="">Error cargando horarios</option>';
+      }
+    }
+
+    vetSelect.addEventListener('change', cargarSlots);
+    fechaInput.addEventListener('change', cargarSlots);
+
+    // Si vienen iniciales (ej: reintento con errores), recarga
+    if(vetSelect.value && fechaInput.value){ cargarSlots(); }
+  })();
+</script>
+{% endblock %}
